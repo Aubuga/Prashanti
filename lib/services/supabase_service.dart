@@ -22,7 +22,7 @@ class _MyTablePageState extends State<MyTablePage> {
   Future<void> fetchData() async {
     try {
       final response = await supabase
-          .from('products') // replace with your table name
+          .from('despensa_items') // replace with your table name
           .select();
 
       setState(() {
@@ -56,3 +56,10 @@ class _MyTablePageState extends State<MyTablePage> {
     );
   }
 }
+
+// TO REMOVE DPULICATES FROM THE DATABASE RUN THIS SQL:
+
+// SELECT nombre, array_agg(id) AS ids, count(*) 
+// FROM despensa_items
+// GROUP BY nombre
+// HAVING count(*) > 1;

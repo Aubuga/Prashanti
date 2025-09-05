@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/producto.dart'; // import product model
-import '../services/producto_service.dart'; // import the service for implementation in _saveProductos
+import '../services/dolar_service.dart';
+ // import the service for implementation in _saveProductos
 import '../services/producto_remote_service.dart';
 class AdminDespensaPage extends StatefulWidget {
   const AdminDespensaPage({super.key});
@@ -50,7 +51,7 @@ Future<void> showProductoForm({
               const SizedBox(height: 10),
               TextField(
                 controller: precioController,
-                decoration: const InputDecoration(labelText: 'Precio'),
+                decoration: const InputDecoration(labelText: 'Precio en USD'),
                 keyboardType: TextInputType.number,
               ),
               const SizedBox(height: 10),
@@ -69,6 +70,7 @@ Future<void> showProductoForm({
                 child: ElevatedButton(
                   onPressed: () {
                     final updated = Producto(
+                      id: producto.id, //to fix the issue with the duplicate id
                       nombre: nombreController.text.trim(),
                       descripcion: descripcionController.text.trim(),
                       precio: double.tryParse(precioController.text.trim()) ?? 0.0,
@@ -92,20 +94,8 @@ Future<void> showProductoForm({
 class _AdminDespensaPageState extends State<AdminDespensaPage> {
   // Temporary in-memory list of products
   List<Producto> productos = [
-    Producto(
-      nombre: 'Yerba Mate',
-      descripcion: 'Yerba orgánica 500g',
-      precio: 2500.0,
-      stock: 12,
-      imageUrl: 'https://via.placeholder.com/80',
-    ),
-    Producto(
-      nombre: 'Harina Integral',
-      descripcion: 'Harina de trigo 1kg',
-      precio: 1500.0,
-      stock: 8,
-      imageUrl: 'https://via.placeholder.com/80',
-    ),
+    
+
   ];
 
  final _remote = ProductoRemoteService();
@@ -114,6 +104,49 @@ class _AdminDespensaPageState extends State<AdminDespensaPage> {
 void initState() {
   super.initState();
   _load();
+}
+Future<void> _deleteProducto(int index) async {
+  final producto = productos[index];
+
+  final confirm = await showDialog<bool>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: const Text('Eliminar producto'),
+      content: Text('¿Seguro que deseas eliminar "${producto.nombre}"?'),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+        TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Eliminar')),
+      ],
+    ),
+  );
+
+  if (confirm != true) return;
+
+  // Optimistic UI: quitar de la lista primero
+  final removed = productos.removeAt(index);
+  setState(() {});
+
+  // Si el producto tiene id, intentamos borrar en Supabase
+  if (producto.id != null && producto.id!.isNotEmpty) {
+    try {
+      await _remote.deleteProducto(producto.id!);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Eliminado: ${producto.nombre}')),
+      );
+    } catch (e) {
+      // Revertir en caso de error
+      productos.insert(index, removed);
+      setState(() {});
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al eliminar: $e')),
+      );
+    }
+  } else {
+    // Items locales (aún no guardados) solo se quitan de la lista
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Eliminado localmente: ${producto.nombre}')),
+    );
+  }
 }
 
 Future<void> _load() async {
@@ -129,11 +162,12 @@ Future<void> _load() async {
 
 void _addProducto() { //ADD PRODUCTO WITH THE FORM NOW
   final nuevo = Producto(
+      id: null,
     nombre: '',
     descripcion: '',
     precio: 0.0,
-    stock: 0,
-    imageUrl: '',
+    stock: 1,
+    imageUrl: 'buscar en google y poner la url',
   );
   showProductoForm(
     context: context,
@@ -162,8 +196,10 @@ void _addProducto() { //ADD PRODUCTO WITH THE FORM NOW
 
 Future<void> _saveProductos() async {
   try {
-    final data = productos.map((p) => p.toMap()).toList();
-    await _remote.saveProductos(data);
+    final saved = await _remote.saveProductos(productos);
+    setState(() {
+      productos = saved; // refresh local list with generated IDs
+    });
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Productos guardados en Supabase')),
@@ -175,26 +211,46 @@ Future<void> _saveProductos() async {
   }
 }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Despensa - Prashanti Coliving (Admin)'),
-        centerTitle: true,
-      actions: [
-  IconButton(
-    icon: const Icon(Icons.refresh),
-    tooltip: 'Refrescar',
-    onPressed: _load,
-  ),
-  IconButton(
-    icon: const Icon(Icons.save),
-    tooltip: 'Guardar productos',
-    onPressed: _saveProductos, // still local/snackbar
-  ),
-],
-
+     appBar: AppBar(
+  title: const Text('Despensa - Prashanti Coliving (Admin)'),
+  centerTitle: true,
+  actions: [
+    Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          'Dólar: ${Dolar.dolarHoy}',
+          style: const TextStyle(
+            color: Colors.black,
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
+    ),
+    IconButton(
+      icon: const Icon(Icons.refresh),
+      tooltip: 'Refrescar',
+      onPressed: _load,
+    ),
+    IconButton(
+      icon: const Icon(Icons.save),
+      tooltip: 'Guardar productos',
+      onPressed: _saveProductos, // still local/snackbar
+    ),
+  ],
+)
+,
       body: ListView.builder(
         itemCount: productos.length,
         itemBuilder: (context, index) {
@@ -210,12 +266,25 @@ Future<void> _saveProductos() async {
                     const Icon(Icons.image_not_supported),
               ),
               title: Text(producto.nombre),
-              subtitle: Text('${producto.descripcion}\nStock: ${producto.stock} - \$${producto.precio.toStringAsFixed(2)}'),
+              subtitle: Text( '${producto.descripcion}\nStock: ${producto.stock} - ${Dolar.precioFinal(producto.precio)}',),
               isThreeLine: true,
-              trailing: IconButton(
-                icon: const Icon(Icons.edit),
-                onPressed: () => _editProducto(index), // to be implemented
-              ),
+              trailing: Row(
+  mainAxisSize: MainAxisSize.min,
+  children: [
+    IconButton(
+      icon: const Icon(Icons.edit),
+      tooltip: 'Editar',
+      onPressed: () => _editProducto(index),
+    ),
+    IconButton(
+      icon: const Icon(Icons.delete),
+      tooltip: 'Eliminar',
+      color: Colors.red,
+      onPressed: () => _deleteProducto(index),
+    ),
+  ],
+),
+
             ),
           );
         },

@@ -62,6 +62,7 @@ class Producto {
 
   Map<String, dynamic> toMap() {
     // Preferred DB schema (snake_case, ES)
+    
     return {
       if (id != null) 'id': id,
       'nombre': nombre,

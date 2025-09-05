@@ -40,6 +40,47 @@ class MyApp extends StatelessWidget {
 
 class LandingPage extends StatelessWidget {
   const LandingPage({super.key});
+void _askPassword(BuildContext context) {
+  final TextEditingController _controller = TextEditingController();
+
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: const Text("Ingrese la contraseña"),
+        content: TextField(
+          controller: _controller,
+          obscureText: true,
+          decoration: const InputDecoration(
+            hintText: "Contraseña",
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context), // cancelar
+            child: const Text("Cancelar"),
+          ),
+          TextButton(
+            onPressed: () {
+              if (_controller.text == "bananitadolca") { // HARDCODED PASSWORD
+                Navigator.pop(context); // cerrar el diálogo
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const AdministradorPage()),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Contraseña incorrecta")),
+                );
+              }
+            },
+            child: const Text("OK"),
+          ),
+        ],
+      );
+    },
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -82,17 +123,16 @@ class LandingPage extends StatelessWidget {
           // TODO: add login navigation later
         },
       ),
-      ListTile(
-        leading: const Icon(Icons.admin_panel_settings),
-        title: const Text('Administrador'),
-        onTap: () {
-          Navigator.pop(context); // close drawer
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const AdministradorPage()),
-          );
-        },
-      ),
+ListTile(
+  leading: const Icon(Icons.admin_panel_settings),
+  title: const Text('Administrador'),
+  onTap: () {
+    Navigator.pop(context); // cerrar el drawer
+    _askPassword(context); // pedir contraseña antes de entrar
+  },
+),
+
+
     ],
   ),
 ),

@@ -9,7 +9,14 @@ class DespensaPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return PopScope(
+      canPop: true,
+  onPopInvokedWithResult: (didPop, result) {
+    if (didPop) { // permite salir
+ 
+   CartService().clearCart(confirmPurchase: false); // sin tocar stock
+     }},
+  child:Scaffold(
       appBar: AppBar(
         // ignore: prefer_const_constructors
         leading: BackButton(), // back button
@@ -75,12 +82,12 @@ class DespensaPage extends StatelessWidget {
 
       ),
       body: const DespensaBody(),
+  ),
     );
   }
 }
 
   @override
-
 
 
 class DespensaBody extends StatefulWidget {
@@ -93,6 +100,23 @@ class DespensaBody extends StatefulWidget {
 
 class _DespensaBodyState extends State<DespensaBody> {
   final _remote = ProductoRemoteService();
+void _onCartChanged() {
+  // Refiltra con el stock actualizado (productos con stock > 0)
+  final raw = _searchCtrl.text.trim().toLowerCase();
+  final words = raw.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
+
+  setState(() {
+    final base = productos.where((p) => p.stock > 0).toList();
+    if (raw.isEmpty) {
+      productosFiltrados = base;
+    } else {
+      productosFiltrados = base.where((p) {
+        final haystack = '${p.nombre} ${p.descripcion}'.toLowerCase();
+        return words.every((w) => haystack.contains(w));
+      }).toList();
+    }
+  });
+}
 
   // data
   List<Producto> productos = [];
@@ -108,17 +132,18 @@ class _DespensaBodyState extends State<DespensaBody> {
 
   @override
   void initState() {
-    super.initState();
-    // so the clear (X) in suffixIcon shows/hides as you type
-    _searchCtrl.addListener(() => setState(() {}));
-    _load();
+  super.initState();
+  _searchCtrl.addListener(() => setState(() {}));
+  CartService().addListener(_onCartChanged); // <— escucha cambios del carrito
+  _load();
   }
+@override
+void dispose() {
+  CartService().removeListener(_onCartChanged); // <— limpiar
+  _searchCtrl.dispose();
+  super.dispose();
+}
 
-  @override
-  void dispose() {
-    _searchCtrl.dispose();
-    super.dispose();
-  }
 
   Future<void> _load() async {
     setState(() {
@@ -128,11 +153,13 @@ class _DespensaBodyState extends State<DespensaBody> {
 
     try {
       final fetched = await _remote.fetchProductos();
-      setState(() {
-        productos = fetched;
-        productosFiltrados = List.from(productos);
-        isLoading = false;
-      });
+setState(() {
+  // solo los que tengan stock disponible
+  productos = fetched.where((p) => p.stock > 0).toList();
+  productosFiltrados = List.from(productos);
+  isLoading = false;
+});
+
     } catch (e) {
       setState(() {
         isLoading = false;
@@ -263,7 +290,7 @@ class _DespensaBodyState extends State<DespensaBody> {
                 final p = productosFiltrados[index];
                 final key = _keyFor(p, index);
                 final count = _qtyOf(key);
-
+                
                 return Card(
                   margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                   child: Padding(
@@ -471,38 +498,146 @@ class CartSummarySheet extends StatelessWidget {
 
               const Divider(),
 
-              // total
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Total:',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    '\$${cart.totalPrice.toStringAsFixed(2)}',
-                    style: const TextStyle(
-                        fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
+              // total and ---ALIAS---
+            Row(
+  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  children: [
+    // Confirmar compra
+// inside CartSummarySheet -> actions Row, replace the Confirm button block with this:
+ElevatedButton.icon(
+  icon: const Icon(Icons.check_circle),
+  label: const Text('Confirmar compra'),
+  onPressed: () async {
+    final cart = CartService();
+    final total = cart.totalPrice;
+
+    // Ask user for final confirmation
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Confirmar compra'),
+        content: Text('Enviar \$${total.toStringAsFixed(2)} a alias: prashanti.coliving'),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancelar')),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('OK')),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    // show a progress indicator while we update DB
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      // Prepare updates: id -> total quantity to decrement
+      final items = cart.items.values.toList();
+      final Map<String, int> updates = {};
+      final List<String> missingIds = [];
+
+      for (final it in items) {
+        final id = it.producto.id;
+        if (id != null && id.isNotEmpty) {
+          updates[id] = (updates[id] ?? 0) + it.cantidad;
+        } else {
+          // product not persisted in DB, note it
+          missingIds.add(it.producto.nombre);
+        }
+      }
+
+      // Perform DB updates only for products that have an id
+      if (updates.isNotEmpty) {
+        await ProductoRemoteService().decrementStocks(updates);
+      }
+
+      // Update local product objects' stock and clear cart
+      // (clearCart(confirmPurchase: true) will call _updateStock() which reduces local producto.stock)
+      cart.clearCart(confirmPurchase: true);
+
+      // close the progress dialog
+      Navigator.of(context).pop();
+
+      // close the cart bottom sheet
+      Navigator.of(context).pop();
+
+      // notify user
+      final msg = missingIds.isEmpty
+          ? 'Compra confirmada: Enviar \$${total.toStringAsFixed(2)} a alias: prashanti.coliving'
+          : 'Compra confirmada. Nota: algunos productos (${missingIds.join(", ")}) no estaban guardados en la base y no se actualizaron en DB. Enviar \$${total.toStringAsFixed(2)} a alias: prashanti.coliving';
+
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    } catch (e) {
+      // close the progress dialog
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error al confirmar compra: $e')));
+    }
+  },
+),
+
+
+    // Vaciar carrito (sin afectar stock)
+    TextButton.icon(
+      icon: const Icon(Icons.delete),
+      label: const Text('Vaciar carrito'),
+      onPressed: () {
+        cart.clearCart(confirmPurchase: false);
+        Navigator.pop(context);
+      },
+    ),
+  ],
+),
+
 
               const SizedBox(height: 12),
 
               // acciones
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton.icon(
-                    icon: const Icon(Icons.delete),
-                    label: const Text('Vaciar carrito'),
-                    onPressed: () {
-                      cart.clear();
-                      Navigator.pop(context);
-                    },
-                  ),
-                ],
-              )
+Row(
+  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  children: [
+    // Confirmar compra button
+    ElevatedButton.icon(
+      icon: const Icon(Icons.check_circle),
+      label: const Text('Confirmar compra'),
+      onPressed: () {
+        showDialog(
+          context: context,
+          builder: (ctx) {
+            return AlertDialog(
+              title: const Text('Compra confirmada'),
+              content: Text(
+                'Enviar \$${cart.totalPrice.toStringAsFixed(2)} a alias: prashanti.coliving',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(ctx).pop(); // close dialog
+                    Navigator.of(context).pop(); // close cart sheet
+                  },
+                  child: const Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    ),
+
+    // Vaciar carrito button (keep as is)
+    TextButton.icon(
+      icon: const Icon(Icons.delete),
+      label: const Text('Vaciar carrito'),
+      onPressed: () {
+        cart.clear();
+        Navigator.pop(context);
+      },
+    ),
+  ],
+)
+
             ],
           ),
         );
