@@ -88555,7 +88555,7 @@ $1(a){return B.AO},
 $S:579}
 A.tl.prototype={
 M(a){var s=null,r=A.hX(s,s,B.Gj,s,s,new A.a2j(a),s,s,s),q=t.p
-return new A.uz(A.Od(A.IR(A.c([new A.bt(B.Fa,A.aku(A.a7J(!1,!0,A.lx(B.O,A.c([B.Gv,A.Nc(s,A.hf($.ou(),new A.a2k(),s),s,s,s,0,8,s)],q),B.B,B.c4),s,!0,s,s,s,s,s,s,s,s,s,new A.a2l(a),s,s,s,s),"Carrito",B.cF),s)],q),s,!0,s,r,B.Vx),s,B.Eq,s,s),new A.a2m(),!0,s,t.VM)}}
+return new A.uz(A.Od(A.IR(A.c([new A.bt(B.Fa,A.aku(A.a7J(!1,!0,A.lx(B.O,A.c([B.Gv,A.Nc(s,A.hf($.ou(),new A.a2k(),s),s,s,s,0,8,s)],q),B.B,B.c4),s,!0,s,s,s,s,s,s,s,s,s,new A.a2l(a),s,s,s,s),"Carrito",B.cF),s)],q),s,!0,s,r,B.Vz),s,B.Eq,s,s),new A.a2m(),!0,s,t.VM)}}
 A.a2m.prototype={
 $2(a,b){if(a)$.ou().zK(!1)},
 $S:218}
@@ -88634,7 +88634,7 @@ FX(a,b,c){this.ab(new A.aoC(this,a,B.e.e4(b,0,c)))},
 M(a){var s,r,q,p,o=this,n=null
 if(o.x)return B.mR
 s=o.w
-if(s!=null)return A.fh(A.hi(A.c([A.ck("Error cargando productos:\n"+s,n,n,n,n,n,n),B.dT,A.ayb(!1,B.Vy,n,n,n,n,n,n,o.gQG(),n,n)],t.p),B.X,B.a_,B.aZ),n,n)
+if(s!=null)return A.fh(A.hi(A.c([A.ck("Error cargando productos:\n"+s,n,n,n,n,n,n),B.dT,A.ayb(!1,B.Vx,n,n,n,n,n,n,o.gQG(),n,n)],t.p),B.X,B.a_,B.aZ),n,n)
 s=A.aku(A.hX(n,n,B.Gs,n,n,new A.aoH(),n,n,n),"Filtrar",B.cF)
 r=o.r
 q=t.p
@@ -88871,7 +88871,7 @@ s=A.aDX(A.c([B.EG,A.Mi(r,B.Gl,new A.a8p(a),r,B.Vj,r),A.Mi(r,B.Gt,new A.a8q(this,
 return A.Od(q,B.DS,A.fh(A.hi(A.c([new A.e5(B.Bp,new A.tN(A.aF1(r,r,new A.xT("assets/images/logo_circular.jpg",r,r)),r,r,r,B.Bt,r),r),B.ln,B.Vd,B.PL,A.ayb(!1,B.Ac,r,r,r,r,r,r,new A.a8r(a),r,r)],p),B.X,B.eV,B.b_),r,r),new A.KI(s,r),r)}}
 A.a8m.prototype={
 $1(a){var s=null,r=A.fG(20),q=this.a,p=A.vt(q,A.ayz(s,new A.hx(4,A.fG(12),B.iW),s,s,s,s,s,s,!0,s,s,s,s,s,s,B.np,!0,s,s,s,s,s,s,s,s,s,s,s,s,s,s,"Contrase\xf1a",s,s,s,s,s,s,s,s,s,!0,!0,s,s,s,s,s,s,s,s,s,s,s,s,s,s),s,!0,s)
-return A.axF(A.c([A.lA(!1,B.Va,s,s,s,s,s,s,new A.a8k(a),s,s),A.lA(!1,B.Vz,s,s,s,s,s,s,new A.a8l(q,a),s,s)],t.p),p,new A.cn(r,B.p),B.Vw)},
+return A.axF(A.c([A.lA(!1,B.Va,s,s,s,s,s,s,new A.a8k(a),s,s),A.lA(!1,B.Vy,s,s,s,s,s,s,new A.a8l(q,a),s,s)],t.p),p,new A.cn(r,B.p),B.Vw)},
 $S:116}
 A.a8k.prototype={
 $0(){A.dF(this.a,!1).iG(null)
@@ -96758,9 +96758,9 @@ B.Vv=new A.c9("Page Not Found",null,B.dV,null,null,null,null,null,null)
 B.Ac=new A.c9("Despensa",null,null,null,null,null,null,null,null)
 B.A7=new A.n(!0,B.de,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 B.Vw=new A.c9("Ingrese la contrase\xf1a",null,B.A7,null,null,null,null,null,null)
-B.Vx=new A.c9("Despensa - Prashanti Coliving",null,null,null,null,null,null,null,null)
-B.Vy=new A.c9("Reintentar",null,null,null,null,null,null,null,null)
-B.Vz=new A.c9("OK",null,B.A7,null,null,null,null,null,null)
+B.Vx=new A.c9("Reintentar",null,null,null,null,null,null,null,null)
+B.Vy=new A.c9("OK",null,B.A7,null,null,null,null,null,null)
+B.Vz=new A.c9("Despensa - Prashanti",null,null,null,null,null,null,null,null)
 B.Z2=new A.akq(0,"system")
 B.LY=new A.i(0.056,0.024)
 B.Mc=new A.i(0.108,0.3085)
