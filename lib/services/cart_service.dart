@@ -67,7 +67,7 @@ void _updateStock() {
 
   void _resetInactivityTimer() {
     _cancelInactivityTimer();
-    _inactivityTimer = Timer(const Duration(minutes: 2), () {
+    _inactivityTimer = Timer(const Duration(minutes: 5), () {
       clearCart(confirmPurchase: false);
     });
   }

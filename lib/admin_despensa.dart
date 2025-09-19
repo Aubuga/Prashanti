@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/producto.dart'; // import product model
-import '../services/dolar_service.dart';
+import 'services/precio_service.dart';
  // import the service for implementation in _saveProductos
 import '../services/producto_remote_service.dart';
 class AdminDespensaPage extends StatefulWidget {
@@ -91,6 +91,8 @@ Future<void> showProductoForm({
   );
 } //END OF PRODUCT FORM
 
+
+
 class _AdminDespensaPageState extends State<AdminDespensaPage> {
   // Temporary in-memory list of products
   List<Producto> productos = [
@@ -100,11 +102,14 @@ class _AdminDespensaPageState extends State<AdminDespensaPage> {
 
  final _remote = ProductoRemoteService();
 
+
+
 @override
 void initState() {
   super.initState();
   _load();
 }
+
 Future<void> _deleteProducto(int index) async {
   final producto = productos[index];
 
@@ -216,9 +221,30 @@ Future<void> _saveProductos() async {
   Widget build(BuildContext context) {
     return Scaffold(
      appBar: AppBar(
-  title: const Text('Despensa - Prashanti Coliving (Admin)'),
+  title: Row(
+    children: [
+      const SizedBox(width: 4), // a tiny spacing from the back button
+      TextButton(
+        onPressed: () {
+          // TODO: action for Ventas button
+        },
+        child: const Text(
+          'Ventas',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+      ),
+      const SizedBox(width: 16),
+      const Expanded(
+        child: Text(
+          'Despensa - Prashanti Coliving (Admin)',
+          textAlign: TextAlign.center,
+        ),
+      ),
+    ],
+  ),
   centerTitle: true,
   actions: [
+    // Dólar display
     Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Container(
@@ -238,6 +264,29 @@ Future<void> _saveProductos() async {
         ),
       ),
     ),
+
+    // % de ganancia editable box
+    Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Container(
+        width: 100, // adjust as needed
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          '% de ganancia: ${Margen.porcentajeGanancia}',
+          style: const TextStyle(
+            color: Colors.black,
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    ),
+
     IconButton(
       icon: const Icon(Icons.refresh),
       tooltip: 'Refrescar',
@@ -250,6 +299,7 @@ Future<void> _saveProductos() async {
     ),
   ],
 )
+
 ,
       body: ListView.builder(
         itemCount: productos.length,
@@ -266,7 +316,7 @@ Future<void> _saveProductos() async {
                     const Icon(Icons.image_not_supported),
               ),
               title: Text(producto.nombre),
-              subtitle: Text( '${producto.descripcion}\nStock: ${producto.stock} - ${Dolar.precioFinal(producto.precio)}',),
+              subtitle: Text( '${producto.descripcion}\nStock: ${producto.stock} - ${PrecioFinal.precioFinal(producto.precio)}',),
               isThreeLine: true,
               trailing: Row(
   mainAxisSize: MainAxisSize.min,

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 //import '../services/producto_service.dart';
 import '../models/producto.dart';
 import 'package:prashanti_coliving/services/producto_remote_service.dart';
 import '../services/cart_service.dart';
-
+import 'services/precio_service.dart';
 class DespensaPage extends StatelessWidget {
   const DespensaPage({super.key});
 
@@ -19,7 +20,12 @@ class DespensaPage extends StatelessWidget {
   child:Scaffold(
       appBar: AppBar(
         // ignore: prefer_const_constructors
-        leading: BackButton(), // back button
+       leading: IconButton(
+    icon: const Icon(Icons.arrow_back),
+    onPressed: () {
+      context.pop(); // go_router back
+    },
+  ),
         title: const Text('Despensa - Prashanti Coliving'),
         centerTitle: true,
         actions: [
@@ -350,7 +356,7 @@ SizedBox(
     crossAxisAlignment: CrossAxisAlignment.end,
     children: [
       Text(
-        '\$${p.precio.toStringAsFixed(2)}',
+        '${PrecioFinal.precioFinal(p.precio)}',
         style: const TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.bold,
@@ -486,9 +492,9 @@ class CartSummarySheet extends StatelessWidget {
                       ),
                       title: Text(item.producto.nombre),
                       subtitle: Text(
-                          'x${item.cantidad}  •  \$${item.producto.precio.toStringAsFixed(2)} c/u'),
+                          'x${item.cantidad}  •  ${PrecioFinal.precioFinal(item.producto.precio)} c/u'),
                       trailing: Text(
-                        '\$${item.subtotal.toStringAsFixed(2)}',
+                        '${PrecioFinal.precioFinal(item.subtotal)}',
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                     );
@@ -513,13 +519,43 @@ ElevatedButton.icon(
 
     // Ask user for final confirmation
     final confirm = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Confirmar compra'),
-        content: Text('Enviar \$${total.toStringAsFixed(2)} a alias: prashanti.coliving'),
+  context: context,
+  builder: (ctx) => AlertDialog(
+    title: const Text('Confirmar compra'),
+    content: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Product list with bullets •
+        ...items.map((it) => RichText(
+          text: TextSpan(
+            style: const TextStyle(color: Colors.black, fontSize: 14),
+            children: [
+              const TextSpan(text: '• '),
+              TextSpan(
+                text: it.producto.nombre,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              TextSpan(text: '  x${it.cantidad}'),
+            ],
+          ),
+        )).toList(),
+
+        const SizedBox(height: 12),
+      const Divider(thickness: 1),
+
+      const SizedBox(height: 8),
+
+        // Original text
+      Text(
+      'Enviar ${PrecioFinal.precioFinal(total)} a alias: prashanti.sma',
+      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+    ),
+      ],
+    ),
         actions: [
           TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancelar')),
-          TextButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('OK')),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Ya transferi!')),
         ],
       ),
     );
@@ -566,8 +602,8 @@ ElevatedButton.icon(
 
       // notify user
       final msg = missingIds.isEmpty
-          ? 'Compra confirmada: Enviar \$${total.toStringAsFixed(2)} a alias: prashanti.coliving'
-          : 'Compra confirmada. Nota: algunos productos (${missingIds.join(", ")}) no estaban guardados en la base y no se actualizaron en DB. Enviar \$${total.toStringAsFixed(2)} a alias: prashanti.coliving';
+          ? 'Compra confirmada: Envia el comprobante de transferencia por ${PrecioFinal.precioFinal(total)} a la administracion'
+          : 'Compra confirmada. Nota: algunos productos (${missingIds.join(", ")}) no se encontraron por un error interno. Intente nuevamente o comunicarse con un Administrador de Prashanti';
 
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
     } catch (e) {
@@ -596,46 +632,9 @@ ElevatedButton.icon(
 
               // acciones
 Row(
-  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  mainAxisAlignment: MainAxisAlignment.spaceBetween, //por ahora sin uso
   children: [
-    // Confirmar compra button
-    ElevatedButton.icon(
-      icon: const Icon(Icons.check_circle),
-      label: const Text('Confirmar compra'),
-      onPressed: () {
-        showDialog(
-          context: context,
-          builder: (ctx) {
-            return AlertDialog(
-              title: const Text('Compra confirmada'),
-              content: Text(
-                'Enviar \$${cart.totalPrice.toStringAsFixed(2)} a alias: prashanti.coliving',
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(ctx).pop(); // close dialog
-                    Navigator.of(context).pop(); // close cart sheet
-                  },
-                  child: const Text('OK'),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    ),
-
-    // Vaciar carrito button (keep as is)
-    TextButton.icon(
-      icon: const Icon(Icons.delete),
-      label: const Text('Vaciar carrito'),
-      onPressed: () {
-        cart.clear();
-        Navigator.pop(context);
-      },
-    ),
-  ],
+],
 )
 
             ],

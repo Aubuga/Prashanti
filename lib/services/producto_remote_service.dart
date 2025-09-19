@@ -67,7 +67,7 @@ Future<List<Producto>> saveProductos(List<Producto> productos) async {
       // parse current stock safely
       final dynamic stockRaw = currentResp['stock'];
       final int currentStock = stockRaw is num
-          ? (stockRaw as num).toInt()
+          ? (stockRaw).toInt()
           : int.tryParse(stockRaw?.toString() ?? '') ?? 0;
 
       final int newStock = (currentStock - qty) < 0 ? 0 : (currentStock - qty);

@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'despensa.dart';
 import 'admin_page.dart';
-void main() async {
+import 'package:go_router/go_router.dart';
 
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Supabase.initialize(
@@ -11,14 +12,7 @@ void main() async {
     anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhweGtneWFqcHp4aG56cmNtcmV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ1OTQxNjQsImV4cCI6MjA3MDE3MDE2NH0.nNz2Oq62Le-L-PDSWn44mUugD2O_MGhcCmOSVB5bDcw',
   );
 
-
-
-
-  runApp(
-  
-      const MyApp(),
-    
-  );
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -26,252 +20,216 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+
+final router = GoRouter(
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (context, state) => const LandingPage(),
+        ),
+        GoRoute(
+          path: '/despensa',
+          builder: (context, state) => const DespensaPage(),
+        ),
+        GoRoute(
+          path: '/admin',
+          builder: (context, state) => const AdministradorPage(),
+        ),
+      ],
+    );
+
+    
+    return MaterialApp.router(
       title: 'Prashanti Coliving',
       debugShowCheckedModeBanner: false,
+      routerConfig: router,
       theme: ThemeData(
-        scaffoldBackgroundColor: const Color(0xFFF5EFE9), // background like your logo
-        fontFamily: 'Sans', // we'll add custom fonts later if you want
+        scaffoldBackgroundColor: const Color(0xFFF5EFE9),
+        fontFamily: 'Sans',
+        colorScheme: const ColorScheme.light(
+          primary: Color(0xFF6C8F6B), // olive green
+          secondary: Color(0xFF9B8F6C), // earthy gold
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF6C8F6B),
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            elevation: 4,
+          ),
+        ),
+        textTheme: const TextTheme(
+          headlineMedium: TextStyle(
+            fontSize: 26,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF6C8F6B),
+          ),
+          bodyMedium: TextStyle(
+            fontSize: 16,
+            color: Color(0xFF4A4A4A),
+          ),
+        ),
       ),
-      home: const LandingPage(),
+      //home: const LandingPage(), comented out after changing to materialapp.router
     );
   }
 }
 
 class LandingPage extends StatelessWidget {
   const LandingPage({super.key});
-void _askPassword(BuildContext context) {
-  final TextEditingController _controller = TextEditingController();
 
-  showDialog(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: const Text("Ingrese la contraseña"),
-        content: TextField(
-          controller: _controller,
-          obscureText: true,
-          decoration: const InputDecoration(
-            hintText: "Contraseña",
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context), // cancelar
-            child: const Text("Cancelar"),
-          ),
-          TextButton(
-            onPressed: () {
-              if (_controller.text == "bananitadolca") { // HARDCODED PASSWORD
-                Navigator.pop(context); // cerrar el diálogo
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const AdministradorPage()),
-                );
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Contraseña incorrecta")),
-                );
-              }
-            },
-            child: const Text("OK"),
-          ),
-        ],
-      );
-    },
-  );
-}
+  void _askPassword(BuildContext context) {
+    final TextEditingController _controller = TextEditingController();
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(  //generates the burger icon and the 'app' visual
-      title: const Text('Prashanti Coliving'),
-      backgroundColor: const Color(0xFF6C8F6B), // green from your logo
-      actions: [
-        Builder(
-          builder: (context) => IconButton(
-            icon: const Icon(Icons.menu),
-            onPressed: () {
-              Scaffold.of(context).openEndDrawer(); // opens right-side menu
-            },
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
           ),
-        ),
-      ],
-    ),
-    endDrawer: Drawer( //uses the burger icon
-  child: ListView(
-    padding: EdgeInsets.zero,
-    children: [
-      const DrawerHeader(
-        decoration: BoxDecoration(
-          color: Color(0xFF6C8F6B),
-        ),
-        child: Text(
-          'Menú',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 24,
+          title: const Text(
+            "Ingrese la contraseña",
+            style: TextStyle(color: Color(0xFF6C8F6B)),
           ),
-        ),
-      ),
-      ListTile(
-        leading: const Icon(Icons.login),
-        title: const Text('Login'),
-        onTap: () {
-          Navigator.pop(context); // close drawer
-          // TODO: add login navigation later
-        },
-      ),
-ListTile(
-  leading: const Icon(Icons.admin_panel_settings),
-  title: const Text('Administrador'),
-  onTap: () {
-    Navigator.pop(context); // cerrar el drawer
-    _askPassword(context); // pedir contraseña antes de entrar
-  },
-),
-
-
-    ],
-  ),
-),
-      body:Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Your logo (we'll add the actual image later)
-          const Icon(Icons.eco, size: 80, color: Color(0xFF6C8F6B)), // placeholder for now
-          const SizedBox(height: 20),
-
-          const Text(
-            'Prashanti Coliving',
-            style: TextStyle(
-              fontSize: 24,
-              color: Color(0xFF6C8F6B),
-              fontWeight: FontWeight.bold,
+          content: TextField(
+            controller: _controller,
+            obscureText: true,
+            decoration: InputDecoration(
+              hintText: "Contraseña",
+              filled: true,
+              fillColor: const Color(0xFFF5EFE9),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
           ),
-          const SizedBox(height: 40),
-
-
-
-          ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const DespensaPage()), //The underscore _ is just a throwaway variable when you're not using the context inside the builder. Since Flutter passes the BuildContext, but you don't use it in the builder
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF6C8F6B), // green
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text(
+                "Cancelar",
+                style: TextStyle(color: Color(0xFF9B8F6C)),
+              ),
             ),
-            child: const Text('Despensa'),
-          ),
-          const SizedBox(height: 20),
-           
-        ],
-      ),
-    ));
+            TextButton(
+              onPressed: () {
+                if (_controller.text == "bananitadolca") {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => const AdministradorPage()),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Contraseña incorrecta")),
+                  );
+                }
+              },
+              child: const Text(
+                "OK",
+                style: TextStyle(color: Color(0xFF6C8F6B)),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
-}
-
-
-
-
-
-
-
-
-class AdministradorLogin extends StatefulWidget {
-  const AdministradorLogin({super.key});
-
-  @override
-  State<AdministradorLogin> createState() => _AdministradorLoginState();
-}
-
-class _AdministradorLoginState extends State<AdministradorLogin> {
-  final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFf3ebe2) ,//COLOR FROM LOGO TO THE BACKGROUND
       appBar: AppBar(
-        title: const Text('Administrador'),
+        title: Text(''),
+        
         backgroundColor: const Color(0xFF6C8F6B),
+        elevation: 4,
+        actions: [
+          Builder(
+            builder: (context) => IconButton(
+              icon: const Icon(Icons.menu),
+              onPressed: () {
+                Scaffold.of(context).openEndDrawer();
+              },
+            ),
+          ),
+        ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(32.0),
+      endDrawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(
+                color: Color(0xFF6C8F6B),
+              ),
+              child: Center(
+                child: Text(
+                  'Menú',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.login, color: Color(0xFF9B8F6C)),
+              title: const Text('Login'),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.admin_panel_settings,
+                  color: Color(0xFF9B8F6C)),
+              title: const Text('Administrador'),
+              onTap: () {
+                Navigator.pop(context);
+                _askPassword(context);
+              },
+            ),
+          ],
+        ),
+      ),
+      body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TextField(
-              controller: _usernameController,
-              decoration: const InputDecoration(
-                labelText: 'Usuario',
-                border: OutlineInputBorder(),
-              ),
-            ),
+        // Constrain the image to a maximum height and width
+  ConstrainedBox(
+    constraints: const BoxConstraints(
+      maxHeight: 200, // adjust as needed
+      maxWidth: 200,  // adjust as needed
+    ),
+    child: Image.asset(
+      'assets/images/logo_circular.jpg', //IMAGEN DE PRASHANTI LOGO
+      fit: BoxFit.contain,
+    ),
+  ),
+            
             const SizedBox(height: 20),
-            TextField(
-              controller: _passwordController,
-              obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'Contraseña',
-                border: OutlineInputBorder(),
+            const Text(
+              '',
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF9B8F6C),
               ),
             ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 40),
             ElevatedButton(
-              onPressed: () {
-                 Navigator.push(
-    context,
-    MaterialPageRoute(builder: (context) => const AdministradorPage()),
-  );
-  //               final username = _usernameController.text.trim();
-  //               final password = _passwordController.text.trim();
-
-  // if (!isValidEmail(username)) {
-  //   showDialog(
-  //     context: context,
-  //     builder: (_) => const AlertDialog(
-  //       title: Text('Error'),
-  //       content: Text('Por favor, ingrese un email válido.'),
-  //     ),
-  //   );
-  //   return;
-  // }
-
-  // if (!isValidPassword(password)) {
-  //   showDialog(
-  //     context: context,
-  //     builder: (_) => const AlertDialog(
-  //       title: Text('Error'),
-  //       content: Text('La contraseña debe tener al menos 6 caracteres.'),
-  //     ),
-  //   );
-  //   return;
-  // }
-
-  // // Si pasa validación:
-  // showDialog(
-  //   context: context,
-  //   builder: (_) => const AlertDialog(
-  //     title: Text('Éxito'),
-  //     content: Text('Acceso válido (aún no se hace nada más).'),
-  //   ),
-  // );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF9B8F6C),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-              ),
-              child: const Text('Entrar'),
-              
+        onPressed: () {
+    context.go('/despensa'); // instead of Navigator.push
+  },
+              child: const Text('Despensa'),
             ),
           ],
         ),
