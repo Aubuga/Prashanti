@@ -26,7 +26,7 @@ class DespensaPage extends StatelessWidget {
       context.pop(); // go_router back
     },
   ),
-        title: const Text('Despensa - Prashanti Coliving'),
+        title: const Text('Despensa - Prashanti'),
         centerTitle: true,
         actions: [
   Padding(
