@@ -350,11 +350,11 @@ setState(() {
                         const SizedBox(width: 12),
 
                         // RIGHT: price, stock, qty controls
-SizedBox(
-  width: 180, // puedes ajustar
+Flexible(
   child: Column(
-    crossAxisAlignment: CrossAxisAlignment.end,
+    crossAxisAlignment: CrossAxisAlignment.start,
     children: [
+      // Precio final
       Text(
         '${PrecioFinal.precioFinal(p.precio)}',
         style: const TextStyle(
@@ -363,61 +363,68 @@ SizedBox(
         ),
       ),
       const SizedBox(height: 6),
+
+      // Stock
       Text('Stock: ${p.stock}'),
       const SizedBox(height: 10),
 
-      // fila de botones +/-
+      // fila de botones +/- y Agregar
       Row(
-        mainAxisAlignment: MainAxisAlignment.end,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          IconButton(
-            tooltip: 'Menos',
-            onPressed: count > 0 ? () => _dec(key, p.stock) : null,
-            icon: const Icon(Icons.remove_circle_outline),
+          // contador
+          Row(
+            children: [
+              IconButton(
+                tooltip: 'Menos',
+                onPressed: count > 0 ? () => _dec(key, p.stock) : null,
+                icon: const Icon(Icons.remove_circle_outline),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
+              Container(
+                width: 42,
+                height: 36,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.black12),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  '$count',
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ),
+              IconButton(
+                tooltip: 'Más',
+                onPressed: count < p.stock ? () => _inc(key, p.stock) : null,
+                icon: const Icon(Icons.add_circle_outline),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
+            ],
           ),
-          Container(
-            width: 42,
-            height: 36,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.black12),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              '$count',
-              style: const TextStyle(fontSize: 16),
-            ),
-          ),
-          IconButton(
-            tooltip: 'Más',
-            onPressed: count < p.stock ? () => _inc(key, p.stock) : null,
-            icon: const Icon(Icons.add_circle_outline),
+
+          // botón Agregar al carrito
+          ElevatedButton.icon(
+            icon: const Icon(Icons.add_shopping_cart),
+            label: const Text('Agregar'),
+            onPressed: count > 0
+                ? () {
+                    CartService().add(p, count, fallbackKey: key);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Agregado: ${p.nombre} x$count')),
+                    );
+                    _setQty(key, 0, p.stock); // reset counter
+                  }
+                : null,
           ),
         ],
       ),
-
-      const SizedBox(height: 8),
-
-      // botón Agregar al carrito
-      Align(
-        alignment: Alignment.centerRight,
-        child: ElevatedButton.icon(
-          icon: const Icon(Icons.add_shopping_cart),
-          label: const Text('Agregar'),
-          onPressed: count > 0
-              ? () {
-                  CartService().add(p, count, fallbackKey: key);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Agregado: ${p.nombre} x$count')),
-                  );
-                  _setQty(key, 0, p.stock); // reset local counter
-                }
-              : null,
-        ),
-      ),
     ],
   ),
-),
+)
+
 
                       ],
                     ),

@@ -1,0 +1,28 @@
+^C:\USERS\AUGUS\DESKTOP\PROYECTOS\PRASHANTI_COLIVING\BUILD\WINDOWS\X64\CMAKEFILES\74615F002EB4A43CDEC63F6650128002\FLUTTER_WINDOWS.DLL.RULE
+setlocal
+"C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E env FLUTTER_ROOT=C:\Users\augus\flutter PROJECT_DIR=C:\Users\augus\Desktop\Proyectos\prashanti_coliving FLUTTER_ROOT=C:\Users\augus\flutter FLUTTER_EPHEMERAL_DIR=C:\Users\augus\Desktop\Proyectos\prashanti_coliving\windows\flutter\ephemeral PROJECT_DIR=C:\Users\augus\Desktop\Proyectos\prashanti_coliving FLUTTER_TARGET=C:\Users\augus\Desktop\Proyectos\prashanti_coliving\lib\main.dart DART_DEFINES=RkxVVFRFUl9WRVJTSU9OPTMuMzUuMQ==,RkxVVFRFUl9DSEFOTkVMPXN0YWJsZQ==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MjBmODI3NDkzOQ==,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049MWU5YTgxMWJmOA==,RkxVVFRFUl9EQVJUX1ZFUlNJT049My45LjA= DART_OBFUSCATION=false TRACK_WIDGET_CREATION=true TREE_SHAKE_ICONS=false PACKAGE_CONFIG=C:\Users\augus\Desktop\Proyectos\prashanti_coliving\.dart_tool\package_config.json C:/Users/augus/flutter/packages/flutter_tools/bin/tool_backend.bat windows-x64 Debug
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^C:\USERS\AUGUS\DESKTOP\PROYECTOS\PRASHANTI_COLIVING\BUILD\WINDOWS\X64\CMAKEFILES\5F260D701A228F2194F66CCA37BB34A2\FLUTTER_ASSEMBLE.RULE
+setlocal
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^C:\USERS\AUGUS\DESKTOP\PROYECTOS\PRASHANTI_COLIVING\WINDOWS\FLUTTER\CMAKELISTS.TXT
+setlocal
+"C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -SC:/Users/augus/Desktop/Proyectos/prashanti_coliving/windows -BC:/Users/augus/Desktop/Proyectos/prashanti_coliving/build/windows/x64 --check-stamp-file C:/Users/augus/Desktop/Proyectos/prashanti_coliving/build/windows/x64/flutter/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
