@@ -3,13 +3,27 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'despensa.dart';
 import 'admin_page.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart' as dotenv; // optional, safe if not used at build time
+// These read values passed with --dart-define at compile time (preferred for CI)
+const _supabaseUrlFromDefine = String.fromEnvironment('SUPABASE_URL');
+const _supabaseAnonKeyFromDefine = String.fromEnvironment('SUPABASE_ANON_KEY');
 
-void main() async {
+// read from --dart-define
+const _supabaseUrl = String.fromEnvironment('SUPABASE_URL');
+const _supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
+
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  if (_supabaseUrl.isEmpty || _supabaseAnonKey.isEmpty) {
+    throw Exception(
+      'Supabase credentials missing. Run with --dart-define or set in launch.json.',
+    );
+  }
+
   await Supabase.initialize(
-    url: 'https://hpxkgyajpzxhnzrcmreu.supabase.co',
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhweGtneWFqcHp4aG56cmNtcmV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ1OTQxNjQsImV4cCI6MjA3MDE3MDE2NH0.nNz2Oq62Le-L-PDSWn44mUugD2O_MGhcCmOSVB5bDcw',
+    url: _supabaseUrl,
+    anonKey: _supabaseAnonKey,
   );
 
   runApp(const MyApp());
@@ -227,7 +241,7 @@ class LandingPage extends StatelessWidget {
             const SizedBox(height: 40),
             ElevatedButton(
         onPressed: () {
-    context.go('/despensa'); // instead of Navigator.push
+    context.push('/despensa'); // instead of Navigator.push
   },
               child: const Text('Despensa'),
             ),

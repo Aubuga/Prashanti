@@ -207,7 +207,7 @@ Future<void> _saveProductos() async {
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Productos guardados en Supabase')),
+      const SnackBar(content: Text('Productos actualizados')),
     );
   } catch (e) {
     ScaffoldMessenger.of(context).showSnackBar(

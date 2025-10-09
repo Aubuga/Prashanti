@@ -10,24 +10,29 @@ class DespensaPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: true,
+  return PopScope(
+  canPop: true,
   onPopInvokedWithResult: (didPop, result) {
-    if (didPop) { // permite salir
- 
-   CartService().clearCart(confirmPurchase: false); // sin tocar stock
-     }},
-  child:Scaffold(
-      appBar: AppBar(
-        // ignore: prefer_const_constructors
-       leading: IconButton(
-    icon: const Icon(Icons.arrow_back),
-    onPressed: () {
-      context.pop(); // go_router back
-    },
-  ),
-        title: const Text('Despensa - Prashanti'),
+    if (!didPop) {
+      // If the system back wasn't already handled, do it manually
+      context.pop();
+    }
+    // Always clear the cart when leaving
+    CartService().clearCart(confirmPurchase: false);
+  },
+  child: Scaffold(
+    appBar: AppBar(
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back),
+        onPressed: () {
+          CartService().clearCart(confirmPurchase: false);
+          context.pop(); // go_router back
+        },
+      ),
+      title: const Text('Despensa - Prashanti', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
+        
         centerTitle: true,
+        backgroundColor: const Color(0xFF6C8F6B),
         actions: [
   Padding(
     padding: const EdgeInsets.only(right: 8.0),
@@ -297,132 +302,132 @@ setState(() {
                 final key = _keyFor(p, index);
                 final count = _qtyOf(key);
                 
-               return Card(
-  margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-  child: Padding(
-    padding: const EdgeInsets.all(12.0),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // LEFT: image + name
-            SizedBox(
-              width: 120,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.network(
-                      p.imageUrl,
-                      width: 110,
-                      height: 80,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) =>
-                          const Icon(Icons.image_not_supported, size: 48),
+                return Card(
+                  margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        // LEFT: image + name
+                        SizedBox(
+                          width: 130, // tweak for your design
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.network(
+                                  p.imageUrl,
+                                  width: 110,
+                                  height: 80,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) =>
+                                      const Icon(Icons.image_not_supported, size: 48),
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                p.nombre,
+                                textAlign: TextAlign.center,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(width: 12),
+
+                        // MIDDLE: description
+                        Expanded(
+                          child: Text(
+                            p.descripcion,
+                            maxLines: 4,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(height: 1.3),
+                          ),
+                        ),
+
+                        const SizedBox(width: 12),
+
+                        // RIGHT: price, stock, qty controls
+SizedBox(
+  width: 150, // puedes ajustar
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.center,
+    children: [
+      Text(
+        '${PrecioFinal.precioFinal(p.precio)}',
+        style: const TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      const SizedBox(height: 2), //between price and stock
+      Text('Stock: ${p.stock}'),
+      const SizedBox(height: 2), //between stock and + -
+
+      // fila de botones +/-
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          IconButton(
+            tooltip: 'Menos',
+            onPressed: count > 0 ? () => _dec(key, p.stock) : null,
+            icon: const Icon(Icons.remove_circle_outline),
+          ),
+          Container(
+            width: 42,
+            height: 36,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.black12),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              '$count',
+              style: const TextStyle(fontSize: 16),
+            ),
+          ),
+          IconButton(
+            tooltip: 'Más',
+            onPressed: count < p.stock ? () => _inc(key, p.stock) : null,
+            icon: const Icon(Icons.add_circle_outline),
+          ),
+        ],
+      ),
+
+      const SizedBox(height: 2), //separator between + - and cart button
+
+      // botón Agregar al carrito
+      Align(
+        alignment: Alignment.bottomCenter,
+        child: ElevatedButton.icon(
+          icon: const Icon(Icons.add_shopping_cart),
+          label: const Text('Aregar'),
+          onPressed: count > 0
+              ? () {
+                  CartService().add(p, count, fallbackKey: key);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Agregado: ${p.nombre} x$count')),
+                  );
+                  _setQty(key, 0, p.stock); // reset local counter
+                }
+              : null,
+        ),
+      ),
+    ],
+  ),
+),
+
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    p.nombre,
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(width: 12),
-
-            // MIDDLE: description
-            Expanded(
-              child: Text(
-                p.descripcion,
-                maxLines: 4,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(height: 1.3),
-              ),
-            ),
-          ],
-        ),
-
-        const SizedBox(height: 12),
-
-        // RIGHT: price, stock, qty controls and Add button
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '${PrecioFinal.precioFinal(p.precio)}',
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text('Stock: ${p.stock}'),
-            const SizedBox(height: 8),
-
-            // fila de botones +/-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                IconButton(
-                  tooltip: 'Menos',
-                  onPressed: count > 0 ? () => _dec(key, p.stock) : null,
-                  icon: const Icon(Icons.remove_circle_outline),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
-                Container(
-                  width: 42,
-                  height: 36,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.black12),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    '$count',
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                ),
-                IconButton(
-                  tooltip: 'Más',
-                  onPressed: count < p.stock ? () => _inc(key, p.stock) : null,
-                  icon: const Icon(Icons.add_circle_outline),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 8),
-
-            ElevatedButton.icon(
-              icon: const Icon(Icons.add_shopping_cart),
-              label: const Text('Agregar'),
-              onPressed: count > 0
-                  ? () {
-                      CartService().add(p, count, fallbackKey: key);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Agregado: ${p.nombre} x$count')),
-                      );
-                      _setQty(key, 0, p.stock);
-                    }
-                  : null,
-            ),
-          ],
-        ),
-      ],
-    ),
-  ),
-);
-
+                );
               },
             ),
           ),
