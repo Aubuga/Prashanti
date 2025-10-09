@@ -1,8 +1,12 @@
 [build]
-  environment = { NETLIFY_USE_FLUTTER = "true" }
-  command = "flutter build web --release --dart-define=SUPABASE_URL=$SUPABASE_URL --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY"
+  command = """
+    # install Flutter SDK
+    git clone https://github.com/flutter/flutter.git --branch stable --depth 1
+    export PATH="$PATH:`pwd`/flutter/bin"
+    flutter doctor
+    flutter build web --release --dart-define=SUPABASE_URL=$SUPABASE_URL --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY
+  """
   publish = "build/web"
-
 
 [[redirects]]
   from = "/*"
