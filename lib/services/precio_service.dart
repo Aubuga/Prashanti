@@ -3,7 +3,7 @@
 class Dolar {
   // Acá actualizás el valor manualmente cada día
   static double  compra = venta;
-  static double  venta = 1450.0;
+  static double  venta = 1600.0;
 
   static double dolarHoy = ((compra+venta)/2);
 }
